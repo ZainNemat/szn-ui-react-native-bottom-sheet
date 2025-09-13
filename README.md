@@ -126,6 +126,133 @@ export default App;
   </View>
 </BottomSheet>
 ```
+### Full Usage Example
+```tsx
+import { useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from "react-native";
+import { BottomSheet } from "szn-ui-react-native-bottom-sheet";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { Image } from "expo-image";
+import { HelloWave } from "@/components/hello-wave";
+
+export default function HomeScreen() {
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+
+  const openBottomSheet = () => setIsBottomSheetVisible(true);
+  const closeBottomSheet = () => setIsBottomSheetVisible(false);
+
+  return (
+    <>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+        headerImage={
+          <Image
+            source={require("@/assets/images/partial-react-logo.png")}
+            style={styles.reactLogo}
+          />
+        }
+      >
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title">Welcome!</ThemedText>
+          <HelloWave />
+        </ThemedView>
+
+        <ThemedView style={styles.stepContainer}>
+          <Pressable style={styles.bottomSheetButton} onPress={openBottomSheet}>
+            <ThemedText style={styles.buttonText}>Open Bottom Sheet</ThemedText>
+          </Pressable>
+        </ThemedView>
+      </ParallaxScrollView>
+
+      <BottomSheet isVisible={isBottomSheetVisible} onClose={closeBottomSheet}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+          <ScrollView contentContainerStyle={styles.bottomSheetContent}>
+            <ThemedText type="subtitle">Bottom Sheet Test</ThemedText>
+            <ThemedText>Your bottom sheet package is working!</ThemedText>
+
+            <TextInput
+              placeholder="Type something here..."
+              value={inputValue}
+              onChangeText={setInputValue}
+              style={styles.textInput}
+              placeholderTextColor="#999"
+            />
+
+            <Pressable style={styles.closeButton} onPress={closeBottomSheet}>
+              <ThemedText style={styles.buttonText}>Close</ThemedText>
+            </Pressable>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BottomSheet>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  stepContainer: {
+    gap: 8,
+    marginBottom: 8,
+  },
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: "absolute",
+  },
+  bottomSheetButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  bottomSheetContent: {
+    padding: 20,
+    alignItems: "center",
+    gap: 16,
+  },
+  textInput: {
+    width: "100%",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    color: "#000",
+  },
+  closeButton: {
+    backgroundColor: "#FF3B30",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+});
+```
 
 ## License
 
