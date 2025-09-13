@@ -34,7 +34,7 @@ export const BottomSheet = ({
   openAtHeight,
   showHeader = false,
   cancelText = "Cancel",
-  sheetBackgroundColor,
+  backgroundColor,
 }: BottomSheetProps): JSX.Element | null => {
   const translateY = useSharedValue(height);
   const backdropOpacity = useSharedValue(0);
@@ -122,7 +122,7 @@ export const BottomSheet = ({
           <Animated.View
             style={[
               styles.sheet,
-              { height, backgroundColor: sheetBackgroundColor ?? "white" },
+              { height, backgroundColor: backgroundColor ?? "white" },
               sheetStyle,
               containerStyle,
             ]}

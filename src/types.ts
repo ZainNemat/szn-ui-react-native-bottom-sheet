@@ -12,5 +12,5 @@ export interface BottomSheetProps {
   title?: string;
   showHeader?: boolean;
   cancelText?: string;
-  sheetBackgroundColor?: string;
+  backgroundColor?: string;
 }
