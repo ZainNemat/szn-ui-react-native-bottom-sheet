@@ -122,9 +122,13 @@ export const BottomSheet = ({
           <Animated.View
             style={[
               styles.sheet,
-              { height, backgroundColor: backgroundColor ?? "white" },
-              sheetStyle,
+              { height },
               containerStyle,
+              {
+                backgroundColor:
+                  backgroundColor ?? containerStyle?.backgroundColor ?? "white",
+              },
+              sheetStyle,
             ]}
           >
             {showDragHandle && (
