@@ -2,6 +2,10 @@
 
 A smooth, customizable bottom sheet component for React Native with gesture support and TypeScript definitions.
 
+
+![Bottom Sheet Demo](./demo.gif)
+
+
 ## Features
 
 - 🎯 **TypeScript Support** - Full TypeScript definitions included
