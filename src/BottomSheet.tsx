@@ -13,27 +13,15 @@ import {
   StyleSheet,
 } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
   withTiming,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
+import { BottomSheetProps } from "./types";
 
-export interface BottomSheetProps {
-  isVisible: boolean;
-  onClose: () => void;
-  children: ReactNode;
-  height?: number;
-  showDragHandle?: boolean;
-  containerStyle?: ViewStyle;
-  title?: string;
-  showHeader?: boolean;
-  cancelText?: string;
-}
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const DISMISS_THRESHOLD = 150;
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export const BottomSheet = ({
   isVisible,
@@ -43,22 +31,25 @@ export const BottomSheet = ({
   showDragHandle = true,
   containerStyle,
   title,
+  openAtHeight,
   showHeader = false,
-  cancelText = 'Cancel',
+  cancelText = "Cancel",
+  sheetBackgroundColor,
 }: BottomSheetProps): JSX.Element | null => {
   const translateY = useSharedValue(height);
   const backdropOpacity = useSharedValue(0);
-  const OPEN_POSITION = 0;
+  const finalOpenAtHeight = openAtHeight ?? SCREEN_HEIGHT * 0.1;
+  const DISMISS_THRESHOLD = 150;
 
   useEffect(() => {
     if (isVisible) {
-      translateY.value = withTiming(OPEN_POSITION, { duration: 300 });
+      translateY.value = withTiming(finalOpenAtHeight, { duration: 300 });
       backdropOpacity.value = withTiming(1, { duration: 300 });
     } else {
       translateY.value = withTiming(height, { duration: 250 });
       backdropOpacity.value = withTiming(0, { duration: 200 });
     }
-  }, [isVisible, height, translateY, backdropOpacity]);
+  }, [isVisible, height, finalOpenAtHeight]);
 
   const startY = useSharedValue(0);
 
@@ -71,40 +62,40 @@ export const BottomSheet = ({
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
-      'worklet';
+      "worklet";
       startY.value = translateY.value;
     })
     .onUpdate((event) => {
-      'worklet';
+      "worklet";
       const newTranslateY = startY.value + event.translationY;
       if (newTranslateY > 0) {
         translateY.value = newTranslateY;
       }
     })
     .onEnd(() => {
-      'worklet';
-      if (translateY.value > DISMISS_THRESHOLD) {
+      "worklet";
+      if (translateY.value > finalOpenAtHeight + DISMISS_THRESHOLD) {
         translateY.value = withTiming(height, { duration: 250 });
         backdropOpacity.value = withTiming(0, { duration: 200 }, (finished) => {
-          'worklet';
+          "worklet";
           if (finished) {
             scheduleOnRN(onClose);
           }
         });
       } else {
-        translateY.value = withTiming(OPEN_POSITION, { duration: 250 });
+        translateY.value = withTiming(finalOpenAtHeight, { duration: 250 });
       }
     });
 
   const sheetStyle = useAnimatedStyle(() => {
-    'worklet';
+    "worklet";
     return {
       transform: [{ translateY: translateY.value }],
     };
   });
 
   const backdropStyle = useAnimatedStyle(() => {
-    'worklet';
+    "worklet";
     return {
       opacity: backdropOpacity.value,
     };
@@ -115,9 +106,14 @@ export const BottomSheet = ({
   const handleDismiss = (): void => {
     dismissWithAnimation();
   };
-
   return (
-    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={handleDismiss}>
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={handleDismiss}
+    >
       <View style={styles.container}>
         <TouchableWithoutFeedback onPress={handleDismiss}>
           <Animated.View style={[styles.backdrop, backdropStyle]} />
@@ -126,7 +122,7 @@ export const BottomSheet = ({
           <Animated.View
             style={[
               styles.sheet,
-              { height },
+              { height, backgroundColor: sheetBackgroundColor ?? "white" },
               sheetStyle,
               containerStyle,
             ]}
@@ -146,7 +142,10 @@ export const BottomSheet = ({
                 <View style={styles.headerSpacer} />
               </View>
             )}
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardView}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+              style={styles.keyboardView}
+            >
               <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
