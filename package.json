@@ -1,7 +1,7 @@
 {
   "name": "szn-ui-react-native-bottom-sheet",
-  "version": "1.0.1",
-  "description": "A customizable React Native bottom sheet component with gesture support",
+  "version": "1.0.2",
+  "description": "A customizable React Native bottom sheet component with gesture support, keyboard awareness, and smooth animations.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -20,19 +20,29 @@
     "gesture",
     "typescript",
     "ios",
-    "android"
+    "android",
+    "reanimated",
+    "gesture-handler",
+    "keyboard-aware"
   ],
   "author": "Syed Zain Nemat",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ZainNemat/react-native-bottom-sheet-component.git"
+    "url": "git+https://github.com/ZainNemat/szn-ui-react-native-bottom-sheet.git"
   },
+  "bugs": {
+    "url": "https://github.com/ZainNemat/szn-ui-react-native-bottom-sheet/issues"
+  },
+  "homepage": "https://github.com/ZainNemat/szn-ui-react-native-bottom-sheet#readme",
   "peerDependencies": {
     "react": "^19.1.0",
     "react-native": "^0.81.0",
     "react-native-gesture-handler": "^2.28.0",
     "react-native-reanimated": "^4.1.0"
+  },
+  "dependencies": {
+    "react-native-worklets": "^0.5.1"
   },
   "devDependencies": {
     "@types/react": "~19.1.12",
@@ -48,8 +58,5 @@
     "prettier": "^3.6.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.40.0"
-  },
-  "dependencies": {
-    "react-native-worklets": "^0.5.1"
   }
 }
