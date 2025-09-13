@@ -65,18 +65,21 @@ export default App;
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `isVisible` | `boolean` | - | Controls the visibility of the bottom sheet |
-| `onClose` | `() => void` | - | Callback called when the sheet should be closed |
-| `children` | `ReactNode` | - | Content to render inside the bottom sheet |
-| `height` | `number` | `Screen height * 0.9` | Height of the bottom sheet |
-| `showDragHandle` | `boolean` | `true` | Whether to show the drag handle |
-| `containerStyle` | `ViewStyle` | - | Additional styles for the sheet container |
-| `title` | `string` | - | Title text for the header |
-| `showHeader` | `boolean` | `false` | Whether to show the header with title and cancel button |
-| `cancelText` | `string` | `'Cancel'` | Text for the cancel button in header |
+| Prop              | Type         | Default               | Description                                                              |
+| ----------------- | ------------ | --------------------- | ------------------------------------------------------------------------ |
+| `isVisible`       | `boolean`    | **Required**          | Controls the visibility of the bottom sheet                              |
+| `onClose`         | `() => void` | **Required**          | Callback when the sheet should be closed                                 |
+| `children`        | `ReactNode`  | **Required**          | Content to render inside the bottom sheet                                |
+| `height`          | `number`     | `SCREEN_HEIGHT * 0.9` | Height of the bottom sheet                                               |
+| `openAtHeight`    | `number`     | `SCREEN_HEIGHT * 0.1` | Distance from the top where the sheet opens (controls slide-up position) |
+| `backgroundColor` | `string`     | `'white'`             | Background color of the bottom sheet                                     |
+| `showDragHandle`  | `boolean`    | `true`                | Whether to show the drag handle                                          |
+| `containerStyle`  | `ViewStyle`  | `undefined`           | Additional styles for the sheet container                                |
+| `title`           | `string`     | `undefined`           | Title text to display in the header                                      |
+| `showHeader`      | `boolean`    | `false`               | Whether to show the header with title and cancel button                  |
+| `cancelText`      | `string`     | `'Cancel'`            | Text for the cancel button in header                                     |
 
+You can customize the sheet's background using either the backgroundColor prop or via containerStyle, but if both are provided, the backgroundColor prop takes precedence.
 ## Examples
 
 ### With Header
@@ -105,6 +108,31 @@ export default App;
 >
   <View style={{ padding: 20 }}>
     <Text>Custom height content</Text>
+  </View>
+</BottomSheet>
+```
+### Custom Open Position
+```tsx
+<BottomSheet
+  isVisible={isVisible}
+  onClose={() => setIsVisible(false)}
+  height={600}
+  openAtHeight={200}
+>
+  <View style={{ padding: 20 }}>
+    <Text>Partially opened bottom sheet</Text>
+  </View>
+</BottomSheet>
+```
+### Custom Background Color
+```tsx
+<BottomSheet
+  isVisible={isVisible}
+  onClose={() => setIsVisible(false)}
+  backgroundColor="#fef2f2"
+>
+  <View style={{ padding: 20 }}>
+    <Text>Light pink background</Text>
   </View>
 </BottomSheet>
 ```

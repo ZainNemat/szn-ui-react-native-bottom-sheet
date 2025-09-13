@@ -6,9 +6,11 @@ export interface BottomSheetProps {
   onClose: () => void;
   children: ReactNode;
   height?: number;
+  openAtHeight?: number;
   showDragHandle?: boolean;
   containerStyle?: ViewStyle;
   title?: string;
   showHeader?: boolean;
   cancelText?: string;
+  backgroundColor?: string;
 }
