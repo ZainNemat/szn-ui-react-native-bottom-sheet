@@ -4,8 +4,6 @@ import React, {
   useMemo,
   forwardRef,
   useImperativeHandle,
-  ForwardRefExoticComponent,
-  RefAttributes,
 } from "react";
 import {
   View,
@@ -175,9 +173,7 @@ export const BottomSheetComponent = forwardRef<
     );
   }
 );
-export const BottomSheet: ForwardRefExoticComponent<
-  BottomSheetProps & RefAttributes<BottomSheetRef>
-> = forwardRef(BottomSheetComponent);
+export const BottomSheet = BottomSheetComponent;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

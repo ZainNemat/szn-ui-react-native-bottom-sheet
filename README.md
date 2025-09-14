@@ -1,7 +1,7 @@
 # React Native Bottom Sheet
 
 A smooth, customizable bottom sheet component for React Native with gesture support and TypeScript definitions.
-
+Ensure that you're using the latest version as previous versions may be broken or depreciated.
 
 ![Bottom Sheet Demo](./demo.gif)
 
