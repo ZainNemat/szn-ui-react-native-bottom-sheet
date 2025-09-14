@@ -13,3 +13,6 @@ export interface BottomSheetProps {
   cancelText?: string;
   backgroundColor?: string;
 }
+export interface BottomSheetRef {
+  dismiss: () => void;
+}

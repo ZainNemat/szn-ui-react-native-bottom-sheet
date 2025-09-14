@@ -8,3 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [1.0.5] - 2025-09-14
 ### Added
 - Allowed panning/dragging of the bottom sheet by the drag handle for smoother user interaction.
+
+## [1.0.6] - 2025-09-14
+### Added
+- Support for animated dismiss via `ref` (e.g., `sheetRef.current?.dismiss()`), enabling custom close buttons inside the sheet content.
+- Example usage in README demonstrating custom header layout with a close icon.

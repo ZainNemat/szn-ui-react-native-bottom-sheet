@@ -1,4 +1,10 @@
-import React, { JSX, useEffect, useMemo } from "react";
+import React, {
+  JSX,
+  useEffect,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   View,
   Modal,
@@ -19,142 +25,151 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import { BottomSheetProps } from "./types";
+import { BottomSheetProps, BottomSheetRef } from "./types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export const BottomSheet = ({
-  isVisible,
-  onClose,
-  children,
-  height = SCREEN_HEIGHT * 0.9,
-  showDragHandle = true,
-  containerStyle,
-  title,
-  showHeader = false,
-  cancelText = "Cancel",
-  backgroundColor,
-}: BottomSheetProps): JSX.Element | null => {
-  const translateY = useSharedValue(height);
-  const backdropOpacity = useSharedValue(0);
-  const DISMISS_THRESHOLD = 150;
+export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
+  (
+    {
+      isVisible,
+      onClose,
+      children,
+      height = SCREEN_HEIGHT * 0.9,
+      showDragHandle = true,
+      containerStyle,
+      title,
+      showHeader = false,
+      cancelText = "Cancel",
+      backgroundColor,
+    }: BottomSheetProps,
+    ref
+  ): JSX.Element | null => {
+    const translateY = useSharedValue(height);
+    const backdropOpacity = useSharedValue(0);
+    const DISMISS_THRESHOLD = 150;
 
-  useEffect(() => {
-    if (isVisible) {
-      translateY.value = withTiming(0, { duration: 300 });
-      backdropOpacity.value = withTiming(1, { duration: 300 });
-    } else {
+    const dismissWithAnimation = (): void => {
       translateY.value = withTiming(height, { duration: 250 });
-      backdropOpacity.value = withTiming(0, { duration: 200 });
-    }
-  }, [isVisible, height]);
+      backdropOpacity.value = withTiming(0, { duration: 200 }, () => {
+        scheduleOnRN(onClose);
+      });
+    };
 
-  const dismissWithAnimation = (): void => {
-    translateY.value = withTiming(height, { duration: 250 });
-    backdropOpacity.value = withTiming(0, { duration: 200 }, () => {
-      scheduleOnRN(onClose);
-    });
-  };
+    useImperativeHandle(ref, () => ({
+      dismiss: dismissWithAnimation,
+    }));
 
-  const panResponder = useMemo(() => {
-    let startY = 0;
+    useEffect(() => {
+      if (isVisible) {
+        translateY.value = withTiming(0, { duration: 300 });
+        backdropOpacity.value = withTiming(1, { duration: 300 });
+      } else {
+        translateY.value = withTiming(height, { duration: 250 });
+        backdropOpacity.value = withTiming(0, { duration: 200 });
+      }
+    }, [isVisible, height]);
 
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) =>
-        Math.abs(gestureState.dy) > 5,
-      onPanResponderGrant: () => {
-        startY = translateY.value;
-      },
-      onPanResponderMove: (_, gestureState) => {
-        const newY = startY + gestureState.dy;
-        const clampedY = Math.max(0, Math.min(newY, height));
-        translateY.value = clampedY;
-      },
-      onPanResponderRelease: () => {
-        if (translateY.value > DISMISS_THRESHOLD) {
-          dismissWithAnimation();
-        } else {
-          translateY.value = withSpring(0, {
-            damping: 15,
-            stiffness: 150,
-          });
-        }
-      },
-    });
-  }, [translateY, height, onClose]);
+    const panResponder = useMemo(() => {
+      let startY = 0;
 
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
+      return PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          Math.abs(gestureState.dy) > 5,
+        onPanResponderGrant: () => {
+          startY = translateY.value;
+        },
+        onPanResponderMove: (_, gestureState) => {
+          const newY = startY + gestureState.dy;
+          const clampedY = Math.max(0, Math.min(newY, height));
+          translateY.value = clampedY;
+        },
+        onPanResponderRelease: () => {
+          if (translateY.value > DISMISS_THRESHOLD) {
+            dismissWithAnimation();
+          } else {
+            translateY.value = withSpring(0, {
+              damping: 15,
+              stiffness: 150,
+            });
+          }
+        },
+      });
+    }, [translateY, height, onClose]);
 
-  const backdropStyle = useAnimatedStyle(() => ({
-    opacity: backdropOpacity.value,
-  }));
+    const sheetStyle = useAnimatedStyle(() => ({
+      transform: [{ translateY: translateY.value }],
+    }));
 
-  if (!isVisible) return null;
+    const backdropStyle = useAnimatedStyle(() => ({
+      opacity: backdropOpacity.value,
+    }));
 
-  return (
-    <Modal
-      visible
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={dismissWithAnimation}
-    >
-      <View style={styles.container}>
-        <TouchableWithoutFeedback onPress={dismissWithAnimation}>
-          <Animated.View style={[styles.backdrop, backdropStyle]} />
-        </TouchableWithoutFeedback>
+    if (!isVisible) return null;
 
-        <Animated.View
-          style={[
-            styles.sheet,
-            { height },
-            containerStyle,
-            {
-              backgroundColor:
-                backgroundColor ?? containerStyle?.backgroundColor ?? "white",
-            },
-            sheetStyle,
-          ]}
-        >
-          {showDragHandle && (
-            <View
-              {...panResponder.panHandlers}
-              style={styles.dragHandleContainer}
-            >
-              <View style={styles.dragHandle} />
-            </View>
-          )}
+    return (
+      <Modal
+        visible
+        transparent
+        animationType="none"
+        statusBarTranslucent
+        onRequestClose={dismissWithAnimation}
+      >
+        <View style={styles.container}>
+          <TouchableWithoutFeedback onPress={dismissWithAnimation}>
+            <Animated.View style={[styles.backdrop, backdropStyle]} />
+          </TouchableWithoutFeedback>
 
-          {showHeader && (
-            <View style={styles.header}>
-              <TouchableOpacity onPress={dismissWithAnimation}>
-                <Text style={styles.cancelText}>{cancelText}</Text>
-              </TouchableOpacity>
-              <Text style={styles.title}>{title}</Text>
-              <View style={styles.headerSpacer} />
-            </View>
-          )}
-
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={styles.keyboardView}
+          <Animated.View
+            style={[
+              styles.sheet,
+              { height },
+              containerStyle,
+              {
+                backgroundColor:
+                  backgroundColor ?? containerStyle?.backgroundColor ?? "white",
+              },
+              sheetStyle,
+            ]}
           >
-            <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
+            {showDragHandle && (
+              <View
+                {...panResponder.panHandlers}
+                style={styles.dragHandleContainer}
+              >
+                <View style={styles.dragHandle} />
+              </View>
+            )}
+
+            {showHeader && (
+              <View style={styles.header}>
+                <TouchableOpacity onPress={dismissWithAnimation}>
+                  <Text style={styles.cancelText}>{cancelText}</Text>
+                </TouchableOpacity>
+                <Text style={styles.title}>{title}</Text>
+                <View style={styles.headerSpacer} />
+              </View>
+            )}
+
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+              style={styles.keyboardView}
             >
-              {children}
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-};
+              <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                {children}
+              </ScrollView>
+            </KeyboardAvoidingView>
+          </Animated.View>
+        </View>
+      </Modal>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {
