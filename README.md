@@ -71,7 +71,6 @@ export default App;
 | `onClose`         | `() => void` | **Required**          | Callback when the sheet should be closed                                 |
 | `children`        | `ReactNode`  | **Required**          | Content to render inside the bottom sheet                                |
 | `height`          | `number`     | `SCREEN_HEIGHT * 0.9` | Height of the bottom sheet                                               |
-| `openAtHeight`    | `number`     | `SCREEN_HEIGHT * 0.1` | Distance from the top where the sheet opens (controls slide-up position) |
 | `backgroundColor` | `string`     | `'white'`             | Background color of the bottom sheet                                     |
 | `showDragHandle`  | `boolean`    | `true`                | Whether to show the drag handle                                          |
 | `containerStyle`  | `ViewStyle`  | `undefined`           | Additional styles for the sheet container                                |
@@ -110,6 +109,22 @@ You can customize the sheet's background using either the backgroundColor prop o
     <Text>Custom height content</Text>
   </View>
 </BottomSheet>
+```
+### Multi-Step Flow
+```tsx
+const [step, setStep] = useState(1);
+
+return (
+  <BottomSheet
+    isVisible={true}
+    onClose={() => {}}
+    height={step === 1 ? 200 : step === 2 ? 400 : 600}
+  >
+    {step === 1 && <StepOne onNext={() => setStep(2)} />}
+    {step === 2 && <StepTwo onNext={() => setStep(3)} />}
+    {step === 3 && <StepThree />}
+  </BottomSheet>
+);
 ```
 ### Custom Open Position
 ```tsx

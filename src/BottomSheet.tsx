@@ -1,4 +1,4 @@
-import React, { JSX, ReactNode, useEffect } from 'react';
+import React, { JSX, useEffect, useMemo } from "react";
 import {
   View,
   Modal,
@@ -9,14 +9,14 @@ import {
   Platform,
   Text,
   TouchableOpacity,
-  ViewStyle,
   StyleSheet,
-} from 'react-native';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+  PanResponder,
+} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { BottomSheetProps } from "./types";
@@ -31,27 +31,23 @@ export const BottomSheet = ({
   showDragHandle = true,
   containerStyle,
   title,
-  openAtHeight,
   showHeader = false,
   cancelText = "Cancel",
   backgroundColor,
 }: BottomSheetProps): JSX.Element | null => {
   const translateY = useSharedValue(height);
   const backdropOpacity = useSharedValue(0);
-  const finalOpenAtHeight = openAtHeight ?? SCREEN_HEIGHT * 0.1;
   const DISMISS_THRESHOLD = 150;
 
   useEffect(() => {
     if (isVisible) {
-      translateY.value = withTiming(finalOpenAtHeight, { duration: 300 });
+      translateY.value = withTiming(0, { duration: 300 });
       backdropOpacity.value = withTiming(1, { duration: 300 });
     } else {
       translateY.value = withTiming(height, { duration: 250 });
       backdropOpacity.value = withTiming(0, { duration: 200 });
     }
-  }, [isVisible, height, finalOpenAtHeight]);
-
-  const startY = useSharedValue(0);
+  }, [isVisible, height]);
 
   const dismissWithAnimation = (): void => {
     translateY.value = withTiming(height, { duration: 250 });
@@ -60,106 +56,101 @@ export const BottomSheet = ({
     });
   };
 
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      "worklet";
-      startY.value = translateY.value;
-    })
-    .onUpdate((event) => {
-      "worklet";
-      const newTranslateY = startY.value + event.translationY;
-      if (newTranslateY > 0) {
-        translateY.value = newTranslateY;
-      }
-    })
-    .onEnd(() => {
-      "worklet";
-      if (translateY.value > finalOpenAtHeight + DISMISS_THRESHOLD) {
-        translateY.value = withTiming(height, { duration: 250 });
-        backdropOpacity.value = withTiming(0, { duration: 200 }, (finished) => {
-          "worklet";
-          if (finished) {
-            scheduleOnRN(onClose);
-          }
-        });
-      } else {
-        translateY.value = withTiming(finalOpenAtHeight, { duration: 250 });
-      }
+  const panResponder = useMemo(() => {
+    let startY = 0;
+
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dy) > 5,
+      onPanResponderGrant: () => {
+        startY = translateY.value;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        const newY = startY + gestureState.dy;
+        const clampedY = Math.max(0, Math.min(newY, height));
+        translateY.value = clampedY;
+      },
+      onPanResponderRelease: () => {
+        if (translateY.value > DISMISS_THRESHOLD) {
+          dismissWithAnimation();
+        } else {
+          translateY.value = withSpring(0, {
+            damping: 15,
+            stiffness: 150,
+          });
+        }
+      },
     });
+  }, [translateY, height, onClose]);
 
-  const sheetStyle = useAnimatedStyle(() => {
-    "worklet";
-    return {
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
-  const backdropStyle = useAnimatedStyle(() => {
-    "worklet";
-    return {
-      opacity: backdropOpacity.value,
-    };
-  });
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
 
   if (!isVisible) return null;
 
-  const handleDismiss = (): void => {
-    dismissWithAnimation();
-  };
   return (
     <Modal
       visible
       transparent
       animationType="none"
       statusBarTranslucent
-      onRequestClose={handleDismiss}
+      onRequestClose={dismissWithAnimation}
     >
       <View style={styles.container}>
-        <TouchableWithoutFeedback onPress={handleDismiss}>
+        <TouchableWithoutFeedback onPress={dismissWithAnimation}>
           <Animated.View style={[styles.backdrop, backdropStyle]} />
         </TouchableWithoutFeedback>
-        <GestureDetector gesture={panGesture}>
-          <Animated.View
-            style={[
-              styles.sheet,
-              { height },
-              containerStyle,
-              {
-                backgroundColor:
-                  backgroundColor ?? containerStyle?.backgroundColor ?? "white",
-              },
-              sheetStyle,
-            ]}
-          >
-            {showDragHandle && (
-              <View style={styles.dragHandleContainer}>
-                <View style={styles.dragHandle} />
-              </View>
-            )}
 
-            {showHeader && (
-              <View style={styles.header}>
-                <TouchableOpacity onPress={handleDismiss}>
-                  <Text style={styles.cancelText}>{cancelText}</Text>
-                </TouchableOpacity>
-                <Text style={styles.title}>{title}</Text>
-                <View style={styles.headerSpacer} />
-              </View>
-            )}
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : undefined}
-              style={styles.keyboardView}
+        <Animated.View
+          style={[
+            styles.sheet,
+            { height },
+            containerStyle,
+            {
+              backgroundColor:
+                backgroundColor ?? containerStyle?.backgroundColor ?? "white",
+            },
+            sheetStyle,
+          ]}
+        >
+          {showDragHandle && (
+            <View
+              {...panResponder.panHandlers}
+              style={styles.dragHandleContainer}
             >
-              <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-              >
-                {children}
-              </ScrollView>
-            </KeyboardAvoidingView>
-          </Animated.View>
-        </GestureDetector>
+              <View style={styles.dragHandle} />
+            </View>
+          )}
+
+          {showHeader && (
+            <View style={styles.header}>
+              <TouchableOpacity onPress={dismissWithAnimation}>
+                <Text style={styles.cancelText}>{cancelText}</Text>
+              </TouchableOpacity>
+              <Text style={styles.title}>{title}</Text>
+              <View style={styles.headerSpacer} />
+            </View>
+          )}
+
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.keyboardView}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {children}
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -170,56 +161,56 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backdrop: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   sheet: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 10,
   },
   dragHandleContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 8,
     minHeight: 32,
   },
   dragHandle: {
     width: 48,
     height: 4,
-    backgroundColor: '#d1d5db',
+    backgroundColor: "#d1d5db",
     borderRadius: 2,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: "#f3f4f6",
   },
   cancelText: {
-    color: '#3b82f6',
+    color: "#3b82f6",
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
+    fontWeight: "600",
+    color: "#111827",
   },
   headerSpacer: {
     width: 50,
