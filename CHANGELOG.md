@@ -13,3 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - Support for animated dismiss via `ref` (e.g., `sheetRef.current?.dismiss()`), enabling custom close buttons inside the sheet content.
 - Example usage in README demonstrating custom header layout with a close icon.
+
+## [1.0.7] - 2025-09-14
+### Added
+- Fixed ref not being available in the props.
+- Updated Readme.

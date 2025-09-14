@@ -4,6 +4,8 @@ import React, {
   useMemo,
   forwardRef,
   useImperativeHandle,
+  ForwardRefExoticComponent,
+  RefAttributes,
 } from "react";
 import {
   View,
@@ -29,7 +31,10 @@ import { BottomSheetProps, BottomSheetRef } from "./types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
+export const BottomSheetComponent = forwardRef<
+  BottomSheetRef,
+  BottomSheetProps
+>(
   (
     {
       isVisible,
@@ -170,7 +175,9 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
     );
   }
 );
-
+export const BottomSheet: ForwardRefExoticComponent<
+  BottomSheetProps & RefAttributes<BottomSheetRef>
+> = forwardRef(BottomSheetComponent);
 const styles = StyleSheet.create({
   container: {
     flex: 1,

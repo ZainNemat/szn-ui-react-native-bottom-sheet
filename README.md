@@ -96,7 +96,50 @@ You can customize the sheet's background using either the backgroundColor prop o
   </View>
 </BottomSheet>
 ```
+### If you wish to use your own custom close button instead of the cancel text prop
+```tsx
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { BottomSheet, BottomSheetRef } from 'szn-ui-react-native-bottom-sheet';
+import { Ionicons } from '@expo/vector-icons';
 
+export default function MyScreen(): JSX.Element {
+  const [isVisible, setIsVisible] = useState(false);
+  const sheetRef = useRef<BottomSheetRef>(null);
+
+  const handleOpen = () => setIsVisible(true);
+  const handleClose = () => setIsVisible(false);
+
+  return (
+    <>
+      <TouchableOpacity onPress={handleOpen}>
+        <Text>Open Bottom Sheet</Text>
+      </TouchableOpacity>
+
+      <BottomSheet
+        ref={sheetRef}
+        isVisible={isVisible}
+        onClose={handleClose}
+        showHeader={false}
+        showDragHandle={true}
+        height={600}
+      >
+        <View className="px-5 pb-3 border-b border-gray-100 flex-row justify-between items-center">
+          <Text className="text-lg font-semibold text-gray-900">My Custom Header</Text>
+          <TouchableOpacity
+            onPress={() => sheetRef.current?.dismiss()}
+            className="p-2 bg-gray-100 rounded-full"
+          >
+            <Ionicons name="close" size={18} color="#374151" />
+          </TouchableOpacity>
+        </View>
+
+        <Text className="p-5">Sheet Content Here...</Text>
+      </BottomSheet>
+    </>
+  );
+}
+```
 ### Custom Height
 
 ```tsx
