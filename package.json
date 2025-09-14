@@ -1,6 +1,6 @@
 {
-  "name": "szn-ui-react-native-bottom-sheet",
-  "version": "1.0.9",
+  "name": "@zainnemat/szn-ui-react-native-bottom-sheet",
+  "version": "1.0.10",
   "description": "A customizable React Native bottom sheet component with gesture support, keyboard awareness, and smooth animations.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,6 +12,9 @@
     "prepare": "npm run build",
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "keywords": [
     "react-native",
