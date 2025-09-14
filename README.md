@@ -39,7 +39,7 @@ Make sure to follow the installation instructions for:
 ```tsx
 import React, { useState } from 'react';
 import { View, Text, Button } from 'react-native';
-import { BottomSheet } from '@yourname/react-native-bottom-sheet';
+import { BottomSheet } from "szn-ui-react-native-bottom-sheet";
 
 const App = (): JSX.Element => {
   const [isVisible, setIsVisible] = useState(false);
