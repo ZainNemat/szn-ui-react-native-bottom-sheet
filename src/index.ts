@@ -1,2 +1,2 @@
 export { BottomSheet } from './BottomSheet';
-export type { BottomSheetProps } from './types';
+export type { BottomSheetProps, BottomSheetRef } from "./types";
