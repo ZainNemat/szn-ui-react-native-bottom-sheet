@@ -126,19 +126,6 @@ return (
   </BottomSheet>
 );
 ```
-### Custom Open Position
-```tsx
-<BottomSheet
-  isVisible={isVisible}
-  onClose={() => setIsVisible(false)}
-  height={600}
-  openAtHeight={200}
->
-  <View style={{ padding: 20 }}>
-    <Text>Partially opened bottom sheet</Text>
-  </View>
-</BottomSheet>
-```
 ### Custom Background Color
 ```tsx
 <BottomSheet
