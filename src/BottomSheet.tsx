@@ -11,7 +11,6 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
-  ScrollView,
   Platform,
   Text,
   TouchableOpacity,
@@ -92,10 +91,7 @@ export const BottomSheetComponent = forwardRef<
           if (translateY.value > DISMISS_THRESHOLD) {
             dismissWithAnimation();
           } else {
-            translateY.value = withSpring(0, {
-              damping: 15,
-              stiffness: 150,
-            });
+            translateY.value = withTiming(0, { duration: 250 });
           }
         },
       });
@@ -159,13 +155,7 @@ export const BottomSheetComponent = forwardRef<
               behavior={Platform.OS === "ios" ? "padding" : undefined}
               style={styles.keyboardView}
             >
-              <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-              >
-                {children}
-              </ScrollView>
+              {children}
             </KeyboardAvoidingView>
           </Animated.View>
         </View>
@@ -202,8 +192,8 @@ const styles = StyleSheet.create({
   },
   dragHandleContainer: {
     alignItems: "center",
-    paddingVertical: 8,
-    minHeight: 32,
+    paddingTop: 6,
+    paddingBottom: 4,
   },
   dragHandle: {
     width: 48,

@@ -1,6 +1,6 @@
 {
   "name": "szn-ui-react-native-bottom-sheet",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "A customizable React Native bottom sheet component with gesture support, keyboard awareness, and smooth animations.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
